@@ -42,6 +42,8 @@ public class Main {
         file = new File("images\\" + STEREO_IMAGE + ".jpg");
         ImageIO.write(stereo, "jpg", file);
 
+        System.out.println("3D stereo image created.");
+
     }
 
     private static int subtract(Color c1, Color c2) {
