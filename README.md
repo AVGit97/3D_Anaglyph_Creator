@@ -13,5 +13,5 @@ A simple application that converts 2 left and right eye images to a single 3D An
 
 ---
 
-#### 3D Stereo anaglyph image
+#### 3D Anaglyph stereo image
 ![alt text](https://github.com/AVGit97/3D_Anaglyph/blob/master/images/stereo.jpg)
