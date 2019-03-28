@@ -1,4 +1,4 @@
-# 3D Anaglyph
+# 3D Anaglyph creator
 A simple application that converts 2 left and right eye images to a single 3D Anaglyph (red - cyan) stereo image.
 
 **Left** _eye image_
