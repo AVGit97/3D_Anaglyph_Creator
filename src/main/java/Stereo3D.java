@@ -2,11 +2,9 @@ import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.Java2DFrameConverter;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.util.ArrayList;
 
 class Stereo3D {
 
@@ -41,34 +39,48 @@ class Stereo3D {
 
     }
 
-    private static void convertMovietoJPG(String mp4Path, String imagePath, String imgType, int frameJump) throws Exception, IOException
-    {
+    static BufferedImage[] videoToStereo3D(String leftMP4Path, String rightMP4Path) {
+
+        FFmpegFrameGrabber leftFrameGrabber = new FFmpegFrameGrabber(leftMP4Path);
+        FFmpegFrameGrabber rightFrameGrabber = new FFmpegFrameGrabber(rightMP4Path);
+
+        BufferedImage[] leftFrames = convertMovieToJPG(leftFrameGrabber);
+        BufferedImage[] rightFrames = convertMovieToJPG(rightFrameGrabber);
+
+        if (leftFrames.length != rightFrames.length) {
+            System.out.println("Left and right video frames does not match.");
+            return null;
+        }
+
+        ArrayList<BufferedImage> stereoImages = new ArrayList<BufferedImage>();
+        for (int i = 0; i < leftFrames.length; i++) {
+            stereoImages.add(imageToStereo3D(leftFrames[i], rightFrames[i]));
+        }
+
+        return (BufferedImage[]) stereoImages.toArray();
+
+    }
+
+    private static BufferedImage[] convertMovieToJPG(FFmpegFrameGrabber frameGrabber) {
 
         Java2DFrameConverter converter = new Java2DFrameConverter();
 
-        FFmpegFrameGrabber frameGrabber = new FFmpegFrameGrabber(mp4Path);
+        double frameRate = frameGrabber.getFrameRate();
 
-        frameGrabber.start();
+        System.out.println("Video has " + frameGrabber.getLengthInFrames() + " frames and has frame rate of " + frameRate);
 
-        Frame frame;
-
-        double frameRate=frameGrabber.getFrameRate();
-
-        int imgNum=0;
-
-        System.out.println("Video has "+frameGrabber.getLengthInFrames()+" frames and has frame rate of "+frameRate);
+        ArrayList<BufferedImage> images = new ArrayList<BufferedImage>();
 
         try {
 
-            for(int ii=1;ii<=frameGrabber.getLengthInFrames();ii++){
+            frameGrabber.start();
+            Frame frame;
 
-                imgNum++;
-                frameGrabber.setFrameNumber(ii);
+            for (int i = 1; i <= frameGrabber.getLengthInFrames(); i++) {
+
+                frameGrabber.setFrameNumber(i);
                 frame = frameGrabber.grab();
-                BufferedImage bi = converter.convert(frame);
-                String path = imagePath+File.separator+imgNum+".jpg";
-                ImageIO.write(bi,imgType, new File(path));
-                ii+=frameJump;
+                images.add(converter.convert(frame));
 
             }
 
@@ -79,6 +91,8 @@ class Stereo3D {
             e.printStackTrace();
 
         }
+
+        return (BufferedImage[]) images.toArray();
 
     }
 
